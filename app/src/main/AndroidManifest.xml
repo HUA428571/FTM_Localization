@@ -6,7 +6,6 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-
     <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" />
 
     <application
@@ -19,6 +18,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FTM_1"
         tools:targetApi="29">
+        <activity
+            android:name=".LocationPermissionRequestActivity"
+            android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true">

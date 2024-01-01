@@ -1,3 +1,10 @@
 <resources>
-    <string name="app_name">FTM_1</string>
+    <string name="app_name">FTM_Localization</string>
+
+    <string name="main_message_activity_location_permission_request">See distances to access points with Wifi RTT (permission required).</string>
+    <string name="details_message_activity_location_permission_request">This app needs access to your phone\'s location to show the distances between this device and Wifi RTT enabled access points.</string>
+    <string name="no_thanks_activity_location_permission_request">No Thanks</string>
+    <string name="continue_activity_location_permission_request">Continue</string>
+
+    <string name="mac_mismatch_message_activity_access_point_ranging_results">Callback MAC address doesn\'t match original request MAC address.</string>
 </resources>
