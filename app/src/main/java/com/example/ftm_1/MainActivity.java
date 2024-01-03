@@ -420,8 +420,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return coordinates;
     }
 
-    public List<Double> getCoordinatesNN() throws IOException {
-        List<Double> coordinates = new ArrayList<Double>();
+    public double[] getCoordinatesNN() throws IOException {
+        //List<Double> coordinates = new ArrayList<Double>();
         //使用预训练的TensorFlow Lite模型计算坐标，需要四个AP测得的距离，rssi和四个AP的坐标
         //每个rangingResults是一个list，求测得的平均值
         double d1 = 0.0, d2 = 0.0, d3 = 0.0, d4 = 0.0;
@@ -462,6 +462,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         tfliteModel.tflite.run(input, output);
         tfliteModel.tflite.close();
-        return coordinates;
+        return output;
     }
 }
