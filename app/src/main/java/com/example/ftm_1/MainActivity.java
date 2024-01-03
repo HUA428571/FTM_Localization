@@ -206,7 +206,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @SuppressLint("MissingPermission")
-    private boolean startFTMRanging_Allap()
+    private void startFTMRanging_Allap()
     {
         if (!mScanningAP)
         {
@@ -253,63 +253,77 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Log.d("Debug", "wifiRttManager is not NULL, start ranging");
         mWifiRttManager.startRanging(rangingRequest, getApplication().getMainExecutor(), mRttRangingResultCallback);
 
-        synchronized (lock)
-        {
-            while (!isRangingResultReady)
-            {
-                try
-                {
-                    lock.wait(); // 等待测距结果
-                } catch (InterruptedException e)
-                {
-                    e.printStackTrace();
-                    return false; // 在中断异常发生时提前结束函数
-                }
-            }
-        }
+//        synchronized (lock)
+//        {
+//            while (!isRangingResultReady)
+//            {
+//                try
+//                {
+//                    lock.wait(); // 等待测距结果
+//                } catch (InterruptedException e)
+//                {
+//                    e.printStackTrace();
+//                    return false; // 在中断异常发生时提前结束函数
+//                }
+//            }
+//        }
 
-        while (mFlagRangeSuccess == 0)
-        {
-            Log.d("Debug", "Waiting for ranging result");
-            try
-            {
-                TimeUnit.MICROSECONDS.sleep(5);
-            } catch (InterruptedException e)
-            {
-                throw new RuntimeException(e);
-            }
-        }
+//        while (mFlagRangeSuccess == 0)
+//        {
+//            Log.d("Debug", "Waiting for ranging result");
+//            try
+//            {
+//                TimeUnit.MICROSECONDS.sleep(5);
+//            } catch (InterruptedException e)
+//            {
+//                throw new RuntimeException(e);
+//            }
+//        }
 
-        while (mFlagRangeSuccess != 2 & mRangingRetryCount <= MAX_RANGING_RETRY_COUNT)
-        {
-            // 重新测量
-            mFlagRangeSuccess = 0;
-            mRangingRetryCount += 1;
-            Log.d("Debug", "Ranging retry");
-            mWifiRttManager.startRanging(rangingRequest, getApplication().getMainExecutor(), mRttRangingResultCallback);
-            synchronized (lock)
-            {
-                while (mFlagRangeSuccess == 0)
-                {
-                    try
-                    {
-                        lock.wait(); // 等待测距结果
-                    } catch (InterruptedException e)
-                    {
-                        e.printStackTrace();
-                        return false; // 在中断异常发生时提前结束函数
-                    }
-                }
-            }
-        }
+//        while (mFlagRangeSuccess != 2 & mRangingRetryCount <= MAX_RANGING_RETRY_COUNT)
+//        {
+//            // 重新测量
+//            mFlagRangeSuccess = 0;
+//            mRangingRetryCount += 1;
+//            Log.d("Debug", "Ranging retry");
+//            mWifiRttManager.startRanging(rangingRequest, getApplication().getMainExecutor(), mRttRangingResultCallback);
+//            synchronized (lock)
+//            {
+//                while (mFlagRangeSuccess == 0)
+//                {
+//                    try
+//                    {
+//                        lock.wait(); // 等待测距结果
+//                    } catch (InterruptedException e)
+//                    {
+//                        e.printStackTrace();
+//                        return false; // 在中断异常发生时提前结束函数
+//                    }
+//                }
+//            }
+//        }
 
-        if (mFlagRangeSuccess == 2)
-        {
-            return true;
-        } else
-        {
-            return false;
-        }
+//        if (mFlagRangeSuccess == 2)
+//        {
+//            return true;
+//        } else
+//        {
+//            return false;
+//        }
+    }
+
+    private void calculateAndShowLocation()
+    {
+        //            //调用getCoordinates()函数计算坐标
+//            List<Double> coordinates = getCoordinates();
+//            Log.d("Location", "Coordinates: " + coordinates.get(0) + ", " + coordinates.get(1) + ", " + coordinates.get(2));
+//
+        // 输出结果，后期可以改为任何对结果的处理
+//        text_output.setText("Ranging finished:\n");
+        text_FTM_result_1.setText("AP1: " + rangingResults_1.get(rangingResults_1.size() - 1).getDistanceMm());
+        text_FTM_result_2.setText("AP2: " + rangingResults_2.get(rangingResults_2.size() - 1).getDistanceMm());
+        text_FTM_result_3.setText("AP3: " + rangingResults_3.get(rangingResults_3.size() - 1).getDistanceMm());
+        text_FTM_result_4.setText("AP4: " + rangingResults_4.get(rangingResults_4.size() - 1).getDistanceMm());
     }
 
     private void initView()
@@ -363,26 +377,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             startFTMRanging_Allap();
 
-            //调用getCoordinates()函数计算坐标
-            List<Double> coordinates = getCoordinates();
-            Log.d("Location", "Coordinates: " + coordinates.get(0) + ", " + coordinates.get(1) + ", " + coordinates.get(2));
+            // TODO: 目前看同步问题不好解决，以下内容全部改到onRangingResults()里面
 
-            // 输出结果，后期可以改为任何对结果的处理
-            text_output.setText("Ranging finished:\n");
-            text_FTM_result_1.setText("AP1: " + rangingResults_1.get(rangingResults_1.size() - 1).getDistanceMm());
-            text_FTM_result_2.setText("AP2: " + rangingResults_2.get(rangingResults_2.size() - 1).getDistanceMm());
-            text_FTM_result_3.setText("AP3: " + rangingResults_3.get(rangingResults_3.size() - 1).getDistanceMm());
-            text_FTM_result_4.setText("AP4: " + rangingResults_4.get(rangingResults_4.size() - 1).getDistanceMm());
-
-
-            // TODO:给我写死
-//            StringBuilder resultsText = new StringBuilder("Ranging finished:\n");
-//            for (RangingResult rangingResult : rangingResults)
-//            {
-////                text_range_result.setText(rangingResult.getDistanceMm() + "mm");
-//                resultsText.append(rangingResult.getDistanceMm()).append("mm\n");
-//            }
-//            text_range_result.setText(resultsText.toString());
+//            //调用getCoordinates()函数计算坐标
+//            List<Double> coordinates = getCoordinates();
+//            Log.d("Location", "Coordinates: " + coordinates.get(0) + ", " + coordinates.get(1) + ", " + coordinates.get(2));
+//
+//            // 输出结果，后期可以改为任何对结果的处理
+//            text_output.setText("Ranging finished:\n");
+//            text_FTM_result_1.setText("AP1: " + rangingResults_1.get(rangingResults_1.size() - 1).getDistanceMm());
+//            text_FTM_result_2.setText("AP2: " + rangingResults_2.get(rangingResults_2.size() - 1).getDistanceMm());
+//            text_FTM_result_3.setText("AP3: " + rangingResults_3.get(rangingResults_3.size() - 1).getDistanceMm());
+//            text_FTM_result_4.setText("AP4: " + rangingResults_4.get(rangingResults_4.size() - 1).getDistanceMm());
 
         }
     }
@@ -532,6 +538,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             {
                 mFlagRangeSuccess = 2;
                 Log.d("Debug", "mFlagRangeSuccess:" + mFlagRangeSuccess);
+                text_output.setText("All AP Ranging success");
+                // 测距成功，将测距结果加入到最终结果中
                 rangingResults_1.add(tmpRangingResults_1.get(0));
                 rangingResults_2.add(tmpRangingResults_2.get(0));
                 rangingResults_3.add(tmpRangingResults_3.get(0));
@@ -541,20 +549,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.d("Debug", "rangingResults_2: " + rangingResults_2.get(rangingResults_2.size() - 1).getDistanceMm() + "mm");
                 Log.d("Debug", "rangingResults_3: " + rangingResults_3.get(rangingResults_3.size() - 1).getDistanceMm() + "mm");
                 Log.d("Debug", "rangingResults_4: " + rangingResults_4.get(rangingResults_4.size() - 1).getDistanceMm() + "mm");
+                // TODO: 把处理函数放在这里
+                //  如果要多次测量，就在这里加次数设定
+                calculateAndShowLocation();
+
             } else if (flagAP1 | flagAP2 | flagAP3 | flagAP4)
             {
                 mFlagRangeSuccess = 1;
+                text_output.setText("Ranging failed, please retry");
                 Log.d("Debug", "mFlagRangeSuccess:" + mFlagRangeSuccess);
             } else
             {
                 mFlagRangeSuccess = -2;
+                text_output.setText("Ranging failed, please retry");
                 Log.d("Debug", "mFlagRangeSuccess:" + mFlagRangeSuccess);
-            }
-
-            synchronized (lock)
-            {
-                isRangingResultReady = true;
-                lock.notify();
             }
         }
     }
