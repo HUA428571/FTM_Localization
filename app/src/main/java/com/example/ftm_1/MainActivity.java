@@ -72,6 +72,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     List<RangingResult> rangingResults_3 = new ArrayList<>();
     List<RangingResult> rangingResults_4 = new ArrayList<>();
 
+    private double x1 = 0.0, y1 = 0.0, z1 = 0.0;
+    private double x2 = 0.0, y2 = 10.0, z2 = 0.0;
+    private double x3 = 10.0, y3 = 10.0, z3 = 0.0;
+    private double x4 = 10.0, y4 = 0.0, z4 = 0.0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -161,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // 确保mgr不为空
         if (wifiRttManager != null)
         {
-            mFlagRangeSuccess= false;
+            mFlagRangeSuccess = false;
 
             // 启动测距
             Log.d("Debug_all", "wifiRttManager is not NULL, start ranging");
@@ -187,17 +192,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             // 状态为成功，可以安全地获取距离
                             tmRangingResults.add(result);
                             Log.d("Debug", "Ranging Result:" + result.getDistanceMm() + "mm");
-                            mFlagRangeSuccess= true;
+                            mFlagRangeSuccess = true;
 //                            return;
                         } else
                         {
-                            Log.d("Debug","Ranging failed:" + result.getStatus());
+                            Log.d("Debug", "Ranging failed:" + result.getStatus());
                             // 状态不是成功，处理失败的情况
                         }
                     }
                     //遍历完了所有结果，都没有成功的，就重新测量一次
                     mRangingRetryCount += 1;
-                    if (tmRangingResults.size()==0)
+                    if (tmRangingResults.size() == 0)
                     {
                         if (mRangingRetryCount <= MAX_RANGING_RETRY_COUNT)
                         {
@@ -266,8 +271,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             rangingResults_3.add(tmpRangingResults_3.get(0));
             rangingResults_4.add(tmpRangingResults_4.get(0));
             return true;
-        }
-        else
+        } else
         {
             return false;
         }
@@ -356,22 +360,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private List<Double> getCoordinates() {
-        List <Double> coordinates = new ArrayList<Double>();
+    private List<Double> getCoordinates()
+    {
+        List<Double> coordinates = new ArrayList<Double>();
         //使用最小二乘法计算坐标，需要四个AP测得的距离以及四个AP的坐标
         //每个rangingResults是一个list，求测得的平均值😋
         double d1 = 0.0, d2 = 0.0, d3 = 0.0, d4 = 0.0;
-        for(int i = 0; i < rangingResults_1.size(); i ++){
-            d1 += rangingResults_1.get(i).getDistanceMm()/1000.0;
+        for (int i = 0; i < rangingResults_1.size(); i++)
+        {
+            d1 += rangingResults_1.get(i).getDistanceMm() / 1000.0;
         }
-        for(int i = 0; i < rangingResults_2.size(); i ++){
-            d2 += rangingResults_2.get(i).getDistanceMm()/1000.0;
+        for (int i = 0; i < rangingResults_2.size(); i++)
+        {
+            d2 += rangingResults_2.get(i).getDistanceMm() / 1000.0;
         }
-        for(int i = 0; i < rangingResults_3.size(); i ++){
-            d3 += rangingResults_3.get(i).getDistanceMm()/1000.0;
+        for (int i = 0; i < rangingResults_3.size(); i++)
+        {
+            d3 += rangingResults_3.get(i).getDistanceMm() / 1000.0;
         }
-        for(int i = 0; i < rangingResults_4.size(); i ++){
-            d4 += rangingResults_4.get(i).getDistanceMm()/1000.0;
+        for (int i = 0; i < rangingResults_4.size(); i++)
+        {
+            d4 += rangingResults_4.get(i).getDistanceMm() / 1000.0;
         }
         d1 /= rangingResults_1.size();
         d2 /= rangingResults_2.size();
@@ -379,9 +388,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         d4 /= rangingResults_4.size();
         //使用Apache Commons Math包，由最小二乘法推导得到的公式计算坐标
         //构造系数矩阵
-        double[][] matrixAData = { {2*(x2-x1), 2*(y2-y1)}, {2*(x3-x2), 2*(y3-y2)}, {2*(x4-x3), 2*(y4-y3)} };
-        double[][] matrixBData = { {d1*d1-d2*d2-x1*x1-y1*y1+x2*x2+y2*y2}, {d2*d2-d3*d3-x2*x2-y2*y2+x3*x3+y3*y3},
-                {d3*d3-d4*d4-x3*x3-y3*y3+x4*x4+y4*y4} };
+        double[][] matrixAData = {{2 * (x2 - x1), 2 * (y2 - y1)}, {2 * (x3 - x2), 2 * (y3 - y2)}, {2 * (x4 - x3), 2 * (y4 - y3)}};
+        double[][] matrixBData = {{d1 * d1 - d2 * d2 - x1 * x1 - y1 * y1 + x2 * x2 + y2 * y2}, {d2 * d2 - d3 * d3 - x2 * x2 - y2 * y2 + x3 * x3 + y3 * y3},
+                {d3 * d3 - d4 * d4 - x3 * x3 - y3 * y3 + x4 * x4 + y4 * y4}};
 
         RealMatrix A = new Array2DRowRealMatrix(matrixAData);
         RealMatrix B = new Array2DRowRealMatrix(matrixBData);
