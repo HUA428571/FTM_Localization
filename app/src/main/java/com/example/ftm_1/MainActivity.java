@@ -27,6 +27,8 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.math3.linear.*;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener
 {
     // 定位权限
@@ -353,4 +355,45 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         }
     }
+
+    private List<Double> getCoordinates() {
+        List <Double> coordinates = new ArrayList<Double>();
+        //使用最小二乘法计算坐标，需要四个AP测得的距离以及四个AP的坐标
+        //每个rangingResults是一个list，求测得的平均值😋
+        double d1 = 0.0, d2 = 0.0, d3 = 0.0, d4 = 0.0;
+        for(int i = 0; i < rangingResults_1.size(); i ++){
+            d1 += rangingResults_1.get(i).getDistanceMm()/1000.0;
+        }
+        for(int i = 0; i < rangingResults_2.size(); i ++){
+            d2 += rangingResults_2.get(i).getDistanceMm()/1000.0;
+        }
+        for(int i = 0; i < rangingResults_3.size(); i ++){
+            d3 += rangingResults_3.get(i).getDistanceMm()/1000.0;
+        }
+        for(int i = 0; i < rangingResults_4.size(); i ++){
+            d4 += rangingResults_4.get(i).getDistanceMm()/1000.0;
+        }
+        d1 /= rangingResults_1.size();
+        d2 /= rangingResults_2.size();
+        d3 /= rangingResults_3.size();
+        d4 /= rangingResults_4.size();
+        //使用Apache Commons Math包，由最小二乘法推导得到的公式计算坐标
+        //构造系数矩阵
+        double[][] matrixAData = { {2*(x2-x1), 2*(y2-y1)}, {2*(x3-x2), 2*(y3-y2)}, {2*(x4-x3), 2*(y4-y3)} };
+        double[][] matrixBData = { {d1*d1-d2*d2-x1*x1-y1*y1+x2*x2+y2*y2}, {d2*d2-d3*d3-x2*x2-y2*y2+x3*x3+y3*y3},
+                {d3*d3-d4*d4-x3*x3-y3*y3+x4*x4+y4*y4} };
+
+        RealMatrix A = new Array2DRowRealMatrix(matrixAData);
+        RealMatrix B = new Array2DRowRealMatrix(matrixBData);
+        RealMatrix A_TA = A.transpose().multiply(A);
+        RealMatrix A_TA_inverse = MatrixUtils.inverse(A_TA);
+        RealMatrix X = A_TA_inverse.multiply(A.transpose().multiply(B));
+
+        coordinates.add(X.getEntry(0, 0));
+        coordinates.add(X.getEntry(1, 0));
+        coordinates.add(X.getEntry(2, 0));
+
+        return coordinates;
+    }
+
 }
