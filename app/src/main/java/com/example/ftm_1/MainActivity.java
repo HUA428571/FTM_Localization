@@ -31,6 +31,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 {
     // 定位权限
     private boolean mLocationPermissionApproved = false;
+    // 超时的最大测量次数
+    private int MAX_RANGING_RETRY_COUNT = 3;
+    private int mRangingRetryCount = 1;
+    private boolean mFlagRangeSuccess = false;
 
     private WifiManager mWifiManager;
 
@@ -58,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     List<ScanResult> scanResults = new ArrayList<>();
 
     // 测距结果
-    List<RangingResult> rangingResults = new ArrayList<>();
+//    List<RangingResult> rangingResults = new ArrayList<>();
 
     // TODO：结果也一样，给我写死
     List<RangingResult> rangingResults_1 = new ArrayList<>();
@@ -122,8 +126,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Log.d("Debug", "Get AP scan results");
     }
 
+    private void restartAPScanAndRangingResults()
+    {
+        // 重新扫描AP
+        startScanAP();
+        // 清空测距结果
+        rangingResults_1.clear();
+        rangingResults_2.clear();
+        rangingResults_3.clear();
+        rangingResults_4.clear();
+    }
+
+    private void clearRangingResults()
+    {
+        // 清空测距结果
+        rangingResults_1.clear();
+        rangingResults_2.clear();
+        rangingResults_3.clear();
+        rangingResults_4.clear();
+    }
+
     @SuppressLint("MissingPermission")
-    private void startFTMRanging(ScanResult scanResult, List<RangingResult> rangingResults)
+    private boolean startFTMRanging(ScanResult scanResult, List<RangingResult> tmRangingResults)
     {
         // 构建RangingRequest
         RangingRequest rangingRequest =
@@ -135,6 +159,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // 确保mgr不为空
         if (wifiRttManager != null)
         {
+            mFlagRangeSuccess= false;
+
             // 启动测距
             Log.d("Debug_all", "wifiRttManager is not NULL, start ranging");
 
@@ -157,25 +183,92 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         if (result.getStatus() == RangingResult.STATUS_SUCCESS)
                         {
                             // 状态为成功，可以安全地获取距离
-                            rangingResults.add(result);
+                            tmRangingResults.add(result);
                             Log.d("Debug", "Ranging Result:" + result.getDistanceMm() + "mm");
-//                            text_range_result.setText(result.getDistanceMm() + "mm");
-
+                            mFlagRangeSuccess= true;
+//                            return;
                         } else
                         {
-                            text_range_result.setText("Ranging failed:" + result.getStatus());
+                            Log.d("Debug","Ranging failed:" + result.getStatus());
                             // 状态不是成功，处理失败的情况
+                        }
+                    }
+                    //遍历完了所有结果，都没有成功的，就重新测量一次
+                    mRangingRetryCount += 1;
+                    if (tmRangingResults.size()==0)
+                    {
+                        if (mRangingRetryCount <= MAX_RANGING_RETRY_COUNT)
+                        {
+                            // 重新测量
+                            Log.d("Debug", "Ranging retry");
+                            startFTMRanging(scanResult, tmRangingResults);
+                        } else
+                        {
+                            // 超过最大测量次数，停止测量
+                            Log.d("Debug", "Ranging failed: over max retry count");
+                            text_range_result.setText("Ranging failed: over max retry count");
                         }
                     }
                 }
             });
-
         } else
         {
             // 如果WifiRttManager服务不可用
             text_range_result.setText("WifiRttManager not available");
         }
 
+        return mFlagRangeSuccess;
+    }
+
+    private boolean startFTMRanging_Allap()
+    {
+        if (!mScanningAP)
+        {
+            // 如果没有扫描AP，就先扫描AP
+            startScanAP();
+        }
+
+        List<RangingResult> tmpRangingResults_1 = new ArrayList<>();
+        List<RangingResult> tmpRangingResults_2 = new ArrayList<>();
+        List<RangingResult> tmpRangingResults_3 = new ArrayList<>();
+        List<RangingResult> tmpRangingResults_4 = new ArrayList<>();
+
+        // 遍历扫描结果，匹配MAC地址
+        for (ScanResult scanResult : scanResults)
+        {
+            if (scanResult.BSSID.equals(macAddress_1) & totalAP >= 1)
+            {
+                startFTMRanging(scanResult, tmpRangingResults_1);
+                Log.d("Debug", "Find MAC:" + macAddress_1);
+            } else if (scanResult.BSSID.equals(macAddress_2) & totalAP >= 2)
+            {
+                Log.d("Debug", "Find MAC:" + macAddress_2);
+                startFTMRanging(scanResult, tmpRangingResults_2);
+            } else if (scanResult.BSSID.equals(macAddress_3) & totalAP >= 3)
+            {
+                Log.d("Debug", "Find MAC:" + macAddress_3);
+                startFTMRanging(scanResult, tmpRangingResults_3);
+            } else if (scanResult.BSSID.equals(macAddress_4) & totalAP >= 4)
+            {
+                Log.d("Debug", "Find MAC:" + macAddress_4);
+                startFTMRanging(scanResult, tmpRangingResults_4);
+            }
+        }
+        if (tmpRangingResults_1.size() > 0 &
+                tmpRangingResults_2.size() > 0 &
+                tmpRangingResults_3.size() > 0 &
+                tmpRangingResults_4.size() > 0)
+        {
+            rangingResults_1.add(tmpRangingResults_1.get(0));
+            rangingResults_2.add(tmpRangingResults_2.get(0));
+            rangingResults_3.add(tmpRangingResults_3.get(0));
+            rangingResults_4.add(tmpRangingResults_4.get(0));
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     private void initView()
@@ -217,6 +310,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             {
                 text_output.setText("RTT is not available");
             }
+            restartAPScanAndRangingResults();
         } else if (viewID == R.id.Btn_range)
         {
             // 按下range按钮后，进行测距
@@ -239,33 +333,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                rangingResults.clear();
 //            }
 
-            if (!mScanningAP)
-            {
-                // 如果没有扫描AP，就先扫描AP
-                startScanAP();
-            }
-
-            // 遍历扫描结果，匹配MAC地址
-            for (ScanResult scanResult : scanResults)
-            {
-                if (scanResult.BSSID.equals(macAddress_1) & totalAP >= 1)
-                {
-                    Log.d("Debug", "Find MAC:" + macAddress_1);
-                    startFTMRanging(scanResult, rangingResults_1);
-                } else if (scanResult.BSSID.equals(macAddress_2) & totalAP >= 2)
-                {
-                    Log.d("Debug", "Find MAC:" + macAddress_2);
-                    startFTMRanging(scanResult, rangingResults_2);
-                } else if (scanResult.BSSID.equals(macAddress_3) & totalAP >= 3)
-                {
-                    Log.d("Debug", "Find MAC:" + macAddress_3);
-                    startFTMRanging(scanResult, rangingResults_3);
-                } else if (scanResult.BSSID.equals(macAddress_4) & totalAP >= 4)
-                {
-                    Log.d("Debug", "Find MAC:" + macAddress_4);
-                    startFTMRanging(scanResult, rangingResults_4);
-                }
-            }
+            startFTMRanging_Allap();
 
             // 输出结果，后期可以改为任何对结果的处理
             text_range_result.setText("Ranging finished:\n");
