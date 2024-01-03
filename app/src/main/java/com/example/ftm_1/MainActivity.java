@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private WifiManager mWifiManager;
 
-    TextView text_output, text_range_result;
+    TextView text_output;
     TextView text_FTM_result_1, text_FTM_result_2, text_FTM_result_3, text_FTM_result_4;
 
     Button btn_check, btn_range;
@@ -71,6 +71,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     List<RangingResult> rangingResults_2 = new ArrayList<>();
     List<RangingResult> rangingResults_3 = new ArrayList<>();
     List<RangingResult> rangingResults_4 = new ArrayList<>();
+
+    List<RangingResult> tmpRangingResults_1 = new ArrayList<>();
+    List<RangingResult> tmpRangingResults_2 = new ArrayList<>();
+    List<RangingResult> tmpRangingResults_3 = new ArrayList<>();
+    List<RangingResult> tmpRangingResults_4 = new ArrayList<>();
 
     private double x1 = 0.0, y1 = 0.0, z1 = 0.0;
     private double x2 = 0.0, y2 = 10.0, z2 = 0.0;
@@ -120,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED)
         {
-            text_range_result.setText("Don't have location permission");
+            text_output.setText("Don't have location permission");
         }
 
         // 开始扫描AP
@@ -153,6 +158,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         rangingResults_4.clear();
     }
 
+    private void clearTmpRangingResults()
+    {
+        // 清空测距结果
+        tmpRangingResults_1.clear();
+        tmpRangingResults_2.clear();
+        tmpRangingResults_3.clear();
+        tmpRangingResults_4.clear();
+    }
+
     @SuppressLint("MissingPermission")
     private boolean startFTMRanging(ScanResult scanResult, List<RangingResult> tmRangingResults)
     {
@@ -178,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 {
                     // 测距失败时更新文本
                     Log.d("Debug", "Ranging failed");
-                    text_range_result.setText("Ranging failed");
+                    text_output.setText("Ranging failed");
                 }
 
                 @Override
@@ -213,7 +227,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         {
                             // 超过最大测量次数，停止测量
                             Log.d("Debug", "Ranging failed: over max retry count");
-                            text_range_result.setText("Ranging failed: over max retry count");
+                            text_output.setText("Ranging failed: over max retry count");
                         }
                     }
                 }
@@ -221,7 +235,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else
         {
             // 如果WifiRttManager服务不可用
-            text_range_result.setText("WifiRttManager not available");
+            text_output.setText("WifiRttManager not available");
         }
 
         return mFlagRangeSuccess;
@@ -235,10 +249,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             startScanAP();
         }
 
-        List<RangingResult> tmpRangingResults_1 = new ArrayList<>();
-        List<RangingResult> tmpRangingResults_2 = new ArrayList<>();
-        List<RangingResult> tmpRangingResults_3 = new ArrayList<>();
-        List<RangingResult> tmpRangingResults_4 = new ArrayList<>();
+        clearTmpRangingResults();
 
         // 遍历扫描结果，匹配MAC地址
         for (ScanResult scanResult : scanResults)
@@ -279,9 +290,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void initView()
     {
-        text_output = findViewById(R.id.textView2);
+        text_output = findViewById(R.id.textView);
         text_output.setText("Press check to check RTT");
-        text_range_result = findViewById(R.id.textView);
 
         text_FTM_result_1 = findViewById(R.id.text_FTM_result_1);
         text_FTM_result_2 = findViewById(R.id.text_FTM_result_2);
@@ -320,7 +330,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else if (viewID == R.id.Btn_range)
         {
             // 按下range按钮后，进行测距
-            text_range_result.setText("Start ranging");
+            text_output.setText("Start ranging");
 
             // TODO: 2021/4/27
             //  1. 测距结果列表不清空，会导致结果叠加
@@ -342,7 +352,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             startFTMRanging_Allap();
 
             // 输出结果，后期可以改为任何对结果的处理
-            text_range_result.setText("Ranging finished:\n");
+            text_output.setText("Ranging finished:\n");
             text_FTM_result_1.setText("AP1: " + rangingResults_1.size() + " results");
             text_FTM_result_2.setText("AP2: " + rangingResults_2.size() + " results");
             text_FTM_result_3.setText("AP3: " + rangingResults_3.size() + " results");
