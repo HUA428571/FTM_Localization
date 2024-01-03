@@ -24,6 +24,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -419,4 +420,48 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return coordinates;
     }
 
+    public List<Double> getCoordinatesNN() throws IOException {
+        List<Double> coordinates = new ArrayList<Double>();
+        //使用预训练的TensorFlow Lite模型计算坐标，需要四个AP测得的距离，rssi和四个AP的坐标
+        //每个rangingResults是一个list，求测得的平均值
+        double d1 = 0.0, d2 = 0.0, d3 = 0.0, d4 = 0.0;
+        double rssi1 = 0.0, rssi2 = 0.0, rssi3 = 0.0, rssi4 = 0.0;
+        for (int i = 1; i < rangingResults_1.size(); i++)
+        {
+            d1 += rangingResults_1.get(i).getDistanceMm() / 1000.0;
+            rssi1 += rangingResults_1.get(i).getRssi();
+        }
+        for (int i = 0; i < rangingResults_2.size(); i++)
+        {
+            d2 += rangingResults_2.get(i).getDistanceMm() / 1000.0;
+            rssi2 += rangingResults_2.get(i).getRssi();
+        }
+        for (int i = 0; i < rangingResults_3.size(); i++)
+        {
+            d3 += rangingResults_3.get(i).getDistanceMm() / 1000.0;
+            rssi3 += rangingResults_3.get(i).getRssi();
+        }
+        for (int i = 0; i < rangingResults_4.size(); i++)
+        {
+            d4 += rangingResults_4.get(i).getDistanceMm() / 1000.0;
+            rssi4 += rangingResults_4.get(i).getRssi();
+        }
+        d1 /= rangingResults_1.size();
+        d2 /= rangingResults_2.size();
+        d3 /= rangingResults_3.size();
+        d4 /= rangingResults_4.size();
+        rssi1 /= rangingResults_1.size();
+        rssi2 /= rangingResults_2.size();
+        rssi3 /= rangingResults_3.size();
+        rssi4 /= rangingResults_4.size();
+
+        //调用模型进行推断
+        TFLiteModel tfliteModel = new TFLiteModel(context);
+        double[] input = {d1, d2, d3, d4, rssi1, rssi2, rssi3, rssi4};
+        double[] output = new double[3];
+
+        tfliteModel.tflite.run(input, output);
+        tfliteModel.tflite.close();
+        return coordinates;
+    }
 }
