@@ -29,6 +29,8 @@ import java.util.List;
 
 import org.apache.commons.math3.linear.*;
 
+import com.example.ftm_1.TFLiteModel;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener
 {
     // 定位权限
@@ -79,16 +81,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     List<RangingResult> tmpRangingResults_3 = new ArrayList<>();
     List<RangingResult> tmpRangingResults_4 = new ArrayList<>();
 
-    private double x1 = 0.0, y1 = 0.0, z1 = 0.0;
-    private double x2 = 0.0, y2 = 10.0, z2 = 0.0;
-    private double x3 = 10.0, y3 = 10.0, z3 = 0.0;
-    private double x4 = 10.0, y4 = 0.0, z4 = 0.0;
+    private double x1 = 0.0, y1 = 1.858, z1 = 1.385;
+    private double x2 = 1.036, y2 = 1.094, z2 = 1.053;
+    private double x3 = 3.655, y3 = 1.502, z3 = 0.681;
+    private double x4 = 2.540, y4 = 0.195, z4 = 0.998;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        //初始化控件
+        initView();
 
         mWifiManager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
 
@@ -105,8 +109,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // 扫描所有AP
         startScanAP();
 
-        //初始化控件
-        initView();
+        startFTMRanging_Allap();
+        clearRangingResults();
     }
 
     // 检查是否支持RTT
@@ -203,9 +207,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     if (result.getStatus() == RangingResult.STATUS_SUCCESS)
                     {
                         // 状态为成功，可以安全地获取距离
-                        rangingResultsAAA.add(result);
+                        tmpRangingResults.clear();
                         tmpRangingResults.add(result);
                         Log.d("Debug", "Ranging Result:" + result.getDistanceMm() + "mm");
+                        Log.d("Debug", "tmpRangingResults:" + tmpRangingResults.get(0).getDistanceMm() + "mm");
+                        Log.d("Debug_all", "tmpRangingResults.size:" + tmpRangingResults.size());
+                        Log.d("Debug_all", "tmpRangingResults:" + tmpRangingResults.get(tmpRangingResults.size() - 1).getDistanceMm() + "mm");
                         mFlagRangeSuccess = true;
 //                            return;
                     } else
@@ -253,6 +260,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         clearTmpRangingResults();
 
+        Log.d("Debug", "Start ranging all AP");
         // 遍历扫描结果，匹配MAC地址
         for (ScanResult scanResult : scanResults)
         {
@@ -260,6 +268,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             {
                 Log.d("Debug", "Find MAC:" + macAddress_1);
                 tmpRangingResults_1.add(startFTMRanging(scanResult));
+                Log.d("Debug", "tmpRangingResults_1:" + tmpRangingResults_1.size());
+//                Log.d("Debug", "tmpRangingResults_1:" + tmpRangingResults_1.get(0).getDistanceMm() + "mm");
             } else if (scanResult.BSSID.equals(macAddress_2) & totalAP >= 2)
             {
                 Log.d("Debug", "Find MAC:" + macAddress_2);
@@ -340,12 +350,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             startFTMRanging_Allap();
 
+            //调用getCoordinates()函数计算坐标
+            List<Double> coordinates = getCoordinates();
+            Log.d("Location", "Coordinates: " + coordinates.get(0) + ", " + coordinates.get(1) + ", " + coordinates.get(2));
+
             // 输出结果，后期可以改为任何对结果的处理
             text_output.setText("Ranging finished:\n");
-            text_FTM_result_1.setText("AP1: " + rangingResults_1.size() + " results");
-            text_FTM_result_2.setText("AP2: " + rangingResults_2.size() + " results");
-            text_FTM_result_3.setText("AP3: " + rangingResults_3.size() + " results");
-            text_FTM_result_4.setText("AP4: " + rangingResults_4.size() + " results");
+            text_FTM_result_1.setText("AP1: " + rangingResults_1.get(rangingResults_1.size()-1).getDistanceMm());
+            text_FTM_result_2.setText("AP2: " + rangingResults_2.get(rangingResults_2.size()-1).getDistanceMm());
+            text_FTM_result_3.setText("AP3: " + rangingResults_3.get(rangingResults_3.size()-1).getDistanceMm());
+            text_FTM_result_4.setText("AP4: " + rangingResults_4.get(rangingResults_4.size()-1).getDistanceMm());
 
             // TODO:给我写死
 //            StringBuilder resultsText = new StringBuilder("Ranging finished:\n");
@@ -359,13 +373,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private List<Double> getCoordinates()
+    public List<Double> getCoordinates()
     {
         List<Double> coordinates = new ArrayList<Double>();
         //使用最小二乘法计算坐标，需要四个AP测得的距离以及四个AP的坐标
-        //每个rangingResults是一个list，求测得的平均值😋
+        //每个rangingResults是一个list，求测得的平均值
         double d1 = 0.0, d2 = 0.0, d3 = 0.0, d4 = 0.0;
-        for (int i = 0; i < rangingResults_1.size(); i++)
+        for (int i = 1; i < rangingResults_1.size(); i++)
         {
             d1 += rangingResults_1.get(i).getDistanceMm() / 1000.0;
         }
@@ -385,11 +399,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         d2 /= rangingResults_2.size();
         d3 /= rangingResults_3.size();
         d4 /= rangingResults_4.size();
+
         //使用Apache Commons Math包，由最小二乘法推导得到的公式计算坐标
         //构造系数矩阵
-        double[][] matrixAData = {{2 * (x2 - x1), 2 * (y2 - y1)}, {2 * (x3 - x2), 2 * (y3 - y2)}, {2 * (x4 - x3), 2 * (y4 - y3)}};
-        double[][] matrixBData = {{d1 * d1 - d2 * d2 - x1 * x1 - y1 * y1 + x2 * x2 + y2 * y2}, {d2 * d2 - d3 * d3 - x2 * x2 - y2 * y2 + x3 * x3 + y3 * y3},
-                {d3 * d3 - d4 * d4 - x3 * x3 - y3 * y3 + x4 * x4 + y4 * y4}};
+        double[][] matrixAData = {{2 * (x2 - x1), 2 * (y2 - y1), 2 * (z2 - z1)}, {2 * (x3 - x2), 2 * (y3 - y2), 2 * (z3-z2)}, {2 * (x4 - x3), 2 * (y4 - y3),2*(z4-z3)}};
+        double[][] matrixBData = {{d1 * d1 - d2 * d2 - x1 * x1 - y1 * y1 -z1*z1+ x2 * x2 + y2 * y2+z2*z2}, {d2 * d2 - d3 * d3 - x2 * x2 - y2 * y2-z2*z2 + x3 * x3 + y3 * y3+z3*z3},
+                {d3 * d3 - d4 * d4 - x3 * x3 - y3 * y3 -z3*z3+ x4 * x4 + y4 * y4+z4*z4}};
 
         RealMatrix A = new Array2DRowRealMatrix(matrixAData);
         RealMatrix B = new Array2DRowRealMatrix(matrixBData);
