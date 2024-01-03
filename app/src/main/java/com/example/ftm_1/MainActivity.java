@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private WifiManager mWifiManager;
 
     TextView text_output, text_range_result;
+    TextView text_FTM_result_1, text_FTM_result_2, text_FTM_result_3, text_FTM_result_4;
 
     Button btn_check, btn_range;
 
@@ -43,8 +44,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     // 所有AP的MAC地址
     List<String> macAddress = new ArrayList<>();
 
+    // TODO: 些什么list，就给我写死
+    String macAddress_1 = "34:85:18:8f:1a:19";
+    String macAddress_2 = "34:85:18:8f:42:21";
+    String macAddress_3 = "34:85:18:95:f9:79";
+    String macAddress_4 = "34:85:18:8f:19:c1";
+
+    int totalAP = 4;
+
+    // 是否扫描了AP
+    private boolean mScanningAP = false;
+    // 扫描结果
+    List<ScanResult> scanResults = new ArrayList<>();
+
     // 测距结果
     List<RangingResult> rangingResults = new ArrayList<>();
+
+    // TODO：结果也一样，给我写死
+    List<RangingResult> rangingResults_1 = new ArrayList<>();
+    List<RangingResult> rangingResults_2 = new ArrayList<>();
+    List<RangingResult> rangingResults_3 = new ArrayList<>();
+    List<RangingResult> rangingResults_4 = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -54,11 +74,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         mWifiManager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
 
+        // TODO：暂时在变量里面写死，这部分用不到
         // 初始化所有AP的MAC地址
         macAddress.add("34:85:18:8f:1a:19");    // FTM1
         macAddress.add("34:85:18:8f:42:21");    // FTM2
         macAddress.add("34:85:18:95:f9:79");    // FTM3
         macAddress.add("34:85:18:8f:19:c1");    // FTM4
+
+        // 扫描所有AP
+        startScanAP();
 
         //初始化控件
         initView();
@@ -70,8 +94,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI_RTT);
     }
 
+    private void startScanAP()
+    {
+        // 检查是否有定位权限，没有就申请
+        if (!mLocationPermissionApproved)
+        {
+            Log.d("Debug", "Request for location permission");
+            // On 23+ (M+) devices, fine location permission not granted. Request permission.
+            Intent startIntent = new Intent(this, LocationPermissionRequestActivity.class);
+            startActivity(startIntent);
+        }
+
+        // 还是没有定位权限就寄
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED)
+        {
+            text_range_result.setText("Don't have location permission");
+        }
+
+        // 开始扫描AP
+        mWifiManager.startScan();
+        Log.d("Debug", "Start scan AP");
+        // 获取扫描结果
+        // TODO:检查是否扫描成功
+        scanResults = mWifiManager.getScanResults();
+        mScanningAP = true;
+        Log.d("Debug", "Get AP scan results");
+    }
+
     @SuppressLint("MissingPermission")
-    private void startFTMRanging(ScanResult scanResult)
+    private void startFTMRanging(ScanResult scanResult, List<RangingResult> rangingResults)
     {
         // 构建RangingRequest
         RangingRequest rangingRequest =
@@ -106,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         {
                             // 状态为成功，可以安全地获取距离
                             rangingResults.add(result);
-                            Log.d("Debug", "Ranging Result:"+result.getDistanceMm() + "mm");
+                            Log.d("Debug", "Ranging Result:" + result.getDistanceMm() + "mm");
 //                            text_range_result.setText(result.getDistanceMm() + "mm");
 
                         } else
@@ -131,6 +183,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         text_output = findViewById(R.id.textView2);
         text_output.setText("Press check to check RTT");
         text_range_result = findViewById(R.id.textView);
+
+        text_FTM_result_1 = findViewById(R.id.text_FTM_result_1);
+        text_FTM_result_2 = findViewById(R.id.text_FTM_result_2);
+        text_FTM_result_3 = findViewById(R.id.text_FTM_result_3);
+        text_FTM_result_4 = findViewById(R.id.text_FTM_result_4);
+        text_FTM_result_1.setText("AP1: No Data");
+        text_FTM_result_2.setText("AP2: No Data");
+        text_FTM_result_3.setText("AP3: No Data");
+        text_FTM_result_4.setText("AP4: No Data");
 
         btn_check = (Button) findViewById(R.id.Btn_check);
         btn_range = (Button) findViewById(R.id.Btn_range);
@@ -158,6 +219,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         } else if (viewID == R.id.Btn_range)
         {
+            // 按下range按钮后，进行测距
             text_range_result.setText("Start ranging");
 
             // TODO: 2021/4/27
@@ -177,49 +239,49 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                rangingResults.clear();
 //            }
 
-            // 检查是否有定位权限，没有就申请
-            if (!mLocationPermissionApproved)
+            if (!mScanningAP)
             {
-                Log.d("Debug", "Request for location permission");
-                // On 23+ (M+) devices, fine location permission not granted. Request permission.
-                Intent startIntent = new Intent(this, LocationPermissionRequestActivity.class);
-                startActivity(startIntent);
+                // 如果没有扫描AP，就先扫描AP
+                startScanAP();
             }
 
-            // 还是没有定位权限就寄
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED)
-            {
-                text_range_result.setText("Don't have location permission");
-            }
-
-            // 开始扫描AP
-            mWifiManager.startScan();
-            Log.d("Debug", "Start scan");
-            // 获取扫描结果
-            List<ScanResult> scanResults = mWifiManager.getScanResults();
-            Log.d("Debug", "Get scan results");
             // 遍历扫描结果，匹配MAC地址
             for (ScanResult scanResult : scanResults)
             {
-                for (String mac : macAddress)
+                if (scanResult.BSSID.equals(macAddress_1))
                 {
-                    if (scanResult.BSSID.equals(mac))
-                    {
-                        Log.d("Debug", "Find MAC:" + mac);
-                        startFTMRanging(scanResult);
-                    }
+                    Log.d("Debug", "Find MAC:" + macAddress_1);
+                    startFTMRanging(scanResult, rangingResults_1);
+                } else if (scanResult.BSSID.equals(macAddress_2))
+                {
+                    Log.d("Debug", "Find MAC:" + macAddress_2);
+                    startFTMRanging(scanResult, rangingResults_2);
+                } else if (scanResult.BSSID.equals(macAddress_3))
+                {
+                    Log.d("Debug", "Find MAC:" + macAddress_3);
+                    startFTMRanging(scanResult, rangingResults_3);
+                } else if (scanResult.BSSID.equals(macAddress_4))
+                {
+                    Log.d("Debug", "Find MAC:" + macAddress_4);
+                    startFTMRanging(scanResult, rangingResults_4);
                 }
             }
 
             // 输出结果，后期可以改为任何对结果的处理
-            StringBuilder resultsText = new StringBuilder("Ranging finished:\n");
-            for (RangingResult rangingResult : rangingResults)
-            {
-//                text_range_result.setText(rangingResult.getDistanceMm() + "mm");
-                resultsText.append(rangingResult.getDistanceMm()).append("mm\n");
-            }
-            text_range_result.setText(resultsText.toString());
+            text_range_result.setText("Ranging finished:\n");
+            text_FTM_result_1.setText("AP1: " + rangingResults_1.size() + " results");
+            text_FTM_result_2.setText("AP2: " + rangingResults_2.size() + " results");
+            text_FTM_result_3.setText("AP3: " + rangingResults_3.size() + " results");
+            text_FTM_result_4.setText("AP4: " + rangingResults_4.size() + " results");
+
+            // TODO:给我写死
+//            StringBuilder resultsText = new StringBuilder("Ranging finished:\n");
+//            for (RangingResult rangingResult : rangingResults)
+//            {
+////                text_range_result.setText(rangingResult.getDistanceMm() + "mm");
+//                resultsText.append(rangingResult.getDistanceMm()).append("mm\n");
+//            }
+//            text_range_result.setText(resultsText.toString());
 
         }
     }
