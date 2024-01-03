@@ -248,19 +248,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             // 遍历扫描结果，匹配MAC地址
             for (ScanResult scanResult : scanResults)
             {
-                if (scanResult.BSSID.equals(macAddress_1))
+                if (scanResult.BSSID.equals(macAddress_1) & totalAP >= 1)
                 {
                     Log.d("Debug", "Find MAC:" + macAddress_1);
                     startFTMRanging(scanResult, rangingResults_1);
-                } else if (scanResult.BSSID.equals(macAddress_2))
+                } else if (scanResult.BSSID.equals(macAddress_2) & totalAP >= 2)
                 {
                     Log.d("Debug", "Find MAC:" + macAddress_2);
                     startFTMRanging(scanResult, rangingResults_2);
-                } else if (scanResult.BSSID.equals(macAddress_3))
+                } else if (scanResult.BSSID.equals(macAddress_3) & totalAP >= 3)
                 {
                     Log.d("Debug", "Find MAC:" + macAddress_3);
                     startFTMRanging(scanResult, rangingResults_3);
-                } else if (scanResult.BSSID.equals(macAddress_4))
+                } else if (scanResult.BSSID.equals(macAddress_4) & totalAP >= 4)
                 {
                     Log.d("Debug", "Find MAC:" + macAddress_4);
                     startFTMRanging(scanResult, rangingResults_4);
