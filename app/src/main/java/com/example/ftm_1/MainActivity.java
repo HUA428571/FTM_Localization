@@ -58,6 +58,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private int mMillisecondsDelayBeforeNewRangingRequest=100;
     private static final int MILLISECONDS_DELAY_BEFORE_NEW_RANGING_REQUEST_DEFAULT = 100;
 
+    private int MAX_MULTI_RANGE =
+
     private WifiManager mWifiManager;
     private WifiRttManager mWifiRttManager;
     private RttRangingResultCallback mRttRangingResultCallback;
@@ -120,6 +122,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mWifiRttManager = (WifiRttManager) getSystemService(Context.WIFI_RTT_RANGING_SERVICE);
 
         mRttRangingResultCallback = new RttRangingResultCallback();
+        mRttRangingResultCallback_Multi = new RttRangingResultCallback_Multi();
 
         // TODO：暂时在变量里面写死，这部分用不到
         // 初始化所有AP的MAC地址
