@@ -34,11 +34,11 @@ public class TFLiteModel {
     private double[] mean = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     private double[] std = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
 
-    public double[] runInference(double[] input) {
-        double[] output = new double[3];
+    public double[][] runInference(double[][] input) {
+        double[][] output = new double[1][3];
         //标准化输入数据
         for (int i = 0; i < input.length; i++) {
-            input[i] = (input[i] - mean[i]) / std[i];
+            input[0][i] = (input[0][i] - mean[i]) / std[i];
         }
         tflite.run(input, output);
         return output;

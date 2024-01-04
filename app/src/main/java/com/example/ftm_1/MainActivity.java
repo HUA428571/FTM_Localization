@@ -422,6 +422,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         RealMatrix A = new Array2DRowRealMatrix(matrixAData);
         RealMatrix B = new Array2DRowRealMatrix(matrixBData);
         RealMatrix A_TA = A.transpose().multiply(A);
+        // 假设A_TA可逆，如果不可逆，则需要使用伪逆矩阵，A^+=V*S^+*U^T
         RealMatrix A_TA_inverse = MatrixUtils.inverse(A_TA);
         RealMatrix X = A_TA_inverse.multiply(A.transpose().multiply(B));
 
@@ -672,7 +673,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    public double[] getCoordinatesNN() throws IOException
+    public double[][] getCoordinatesNN() throws IOException
     {
         //List<Double> coordinates = new ArrayList<Double>();
         //使用预训练的TensorFlow Lite模型计算坐标，需要四个AP测得的距离，rssi和四个AP的坐标
@@ -710,10 +711,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //调用模型进行推断
         TFLiteModel tfliteModel = new TFLiteModel(context);
-        double[] input = {d1, d2, d3, d4, rssi1, rssi2, rssi3, rssi4};
-        double[] output = new double[3];
+        double[][] input = {{d1, d2, d3, d4, rssi1, rssi2, rssi3, rssi4}};
+        double[][] output = new double[1][3];
 
+        //输入1x8，输出1x3
         output = tfliteModel.runInference(input);
+
         tfliteModel.tflite.close();
         return output;
     }
