@@ -20,21 +20,16 @@ import android.net.wifi.rtt.WifiRttManager;
 
 import android.os.Handler;
 import android.util.Log;
-import android.util.TimeUtils;
 import android.view.View;
 
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.math3.linear.*;
-
-import com.example.ftm_1.TFLiteModel;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener
 {
@@ -55,10 +50,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     final Handler mRangeRequestDelayHandler = new Handler();
-    private int mMillisecondsDelayBeforeNewRangingRequest=100;
+    private int mMillisecondsDelayBeforeNewRangingRequest = 100;
     private static final int MILLISECONDS_DELAY_BEFORE_NEW_RANGING_REQUEST_DEFAULT = 100;
 
-    private int MAX_MULTI_RANGE =
+    private int MAX_MULTI_RANGE_COUNT = 10;
+    private int mMultiRangeCount = 0;
+    private RangingRequest mRangingRequest;
 
     private WifiManager mWifiManager;
     private WifiRttManager mWifiRttManager;
@@ -240,14 +237,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Log.d("Debug", "builder:" + builder);
 
         // 构建请求
-        RangingRequest rangingRequest = builder.build();
+        mRangingRequest = builder.build();
 
         mFlagRangeSuccess = 0;
         mRangingRetryCount = 1;
 
         // 启动测距
         Log.d("Debug", "wifiRttManager is not NULL, start ranging");
-        mWifiRttManager.startRanging(rangingRequest, getApplication().getMainExecutor(), mRttRangingResultCallback);
+        mWifiRttManager.startRanging(mRangingRequest, getApplication().getMainExecutor(), mRttRangingResultCallback);
     }
 
     @SuppressLint("MissingPermission")
@@ -289,22 +286,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Log.d("Debug", "builder:" + builder);
 
         // 构建请求
-        RangingRequest rangingRequest = builder.build();
+        mRangingRequest = builder.build();
 
         mFlagRangeSuccess = 0;
         mRangingRetryCount = 1;
 
+        // 清空测距数量
+        mMultiRangeCount = 0;
         // 启动测距
         Log.d("Debug", "wifiRttManager is not NULL, start ranging");
-        mWifiRttManager.startRanging(rangingRequest, getApplication().getMainExecutor(), mRttRangingResultCallback_Multi);
+        mWifiRttManager.startRanging(mRangingRequest, getApplication().getMainExecutor(), mRttRangingResultCallback_Multi);
     }
 
 
     private void calculateAndShowLocation()
     {
         //调用getCoordinates()函数计算坐标
-            List<Double> coordinates = getCoordinates();
-            Log.d("Location", "Coordinates: " + coordinates.get(0) + ", " + coordinates.get(1) + ", " + coordinates.get(2));
+        List<Double> coordinates = getCoordinates();
+        Log.d("Location", "Coordinates: " + coordinates.get(0) + ", " + coordinates.get(1) + ", " + coordinates.get(2));
 //
         // 输出结果，后期可以改为任何对结果的处理
 //        text_output.setText("Ranging finished:\n");
@@ -363,6 +362,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             // 按下range按钮后，进行测距
             text_output.setText("Start ranging");
 
+            clearRangingResults();
             startFTMRanging_MultiRequest();
 
             // TODO: 目前看同步问题不好解决，以下内容全部改到onRangingResults()里面
@@ -423,7 +423,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         coordinates.add(X.getEntry(0, 0));
         coordinates.add(X.getEntry(1, 0));
         coordinates.add(X.getEntry(2, 0));
-        Log.d("Debug","X:"+coordinates.get(0)+"Y:"+coordinates.get(1)+"Z:"+coordinates.get(2));
+        Log.d("Debug", "X:" + coordinates.get(0) + "Y:" + coordinates.get(1) + "Z:" + coordinates.get(2));
 
         return coordinates;
     }
@@ -436,10 +436,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mRangeRequestDelayHandler.postDelayed(
                     new Runnable()
                     {
+                        @SuppressLint("MissingPermission")
                         @Override
                         public void run()
                         {
-                            startFTMRanging_MultiRequest();
+                            mWifiRttManager.startRanging(mRangingRequest, getApplication().getMainExecutor(), mRttRangingResultCallback_Multi);
+                            ;
                         }
                     },
                     mMillisecondsDelayBeforeNewRangingRequest);
@@ -450,6 +452,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         {
             Log.d("Debug", "onRangingFailure() code: " + code);
             text_output.setText("Ranging failed: onRangingFailure()");
+            requestNextFTMRanging();
         }
 
         @Override
@@ -521,7 +524,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mFlagRangeSuccess = 2;
                 Log.d("Debug", "mFlagRangeSuccess:" + mFlagRangeSuccess);
                 text_output.setText("All AP Ranging success");
-                // 测距成功，将测距结果加入到最终结果中
+                // 增加测量成功改到测数
+                mMultiRangeCount += 1;
+                // 将测距结果加入到最终结果中
                 rangingResults_1.add(tmpRangingResults_1.get(0));
                 rangingResults_2.add(tmpRangingResults_2.get(0));
                 rangingResults_3.add(tmpRangingResults_3.get(0));
@@ -531,9 +536,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.d("Debug", "rangingResults_2: " + rangingResults_2.get(rangingResults_2.size() - 1).getDistanceMm() + "mm");
                 Log.d("Debug", "rangingResults_3: " + rangingResults_3.get(rangingResults_3.size() - 1).getDistanceMm() + "mm");
                 Log.d("Debug", "rangingResults_4: " + rangingResults_4.get(rangingResults_4.size() - 1).getDistanceMm() + "mm");
-                // TODO: 把处理函数放在这里
-                //  如果要多次测量，就在这里加次数设定
-                calculateAndShowLocation();
+
+                if (mMultiRangeCount <= MAX_MULTI_RANGE_COUNT)
+                {
+                    requestNextFTMRanging();
+                } else
+                {
+                    // TODO: 把处理函数放在这里
+                    //  如果要多次测量，就在这里加次数设定
+                    calculateAndShowLocation();
+                }
 
             } else if (flagAP1 | flagAP2 | flagAP3 | flagAP4)
             {
