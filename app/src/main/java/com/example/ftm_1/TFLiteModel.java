@@ -30,5 +30,18 @@ public class TFLiteModel {
     }
 
     // 添加用于输入处理、模型推断和输出处理的方法
+    // 设置训练集的均值和标准差
+    private double[] mean = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    private double[] std = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+
+    public double[] runInference(double[] input) {
+        double[] output = new double[3];
+        //标准化输入数据
+        for (int i = 0; i < input.length; i++) {
+            input[i] = (input[i] - mean[i]) / std[i];
+        }
+        tflite.run(input, output);
+        return output;
+    }
 
 }

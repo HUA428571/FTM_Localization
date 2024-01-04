@@ -20,16 +20,21 @@ import android.net.wifi.rtt.WifiRttManager;
 
 import android.os.Handler;
 import android.util.Log;
+import android.util.TimeUtils;
 import android.view.View;
 
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.math3.linear.*;
+
+import com.example.ftm_1.TFLiteModel;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener
 {
@@ -708,7 +713,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         double[] input = {d1, d2, d3, d4, rssi1, rssi2, rssi3, rssi4};
         double[] output = new double[3];
 
-        tfliteModel.tflite.run(input, output);
+        output = tfliteModel.runInference(input);
         tfliteModel.tflite.close();
         return output;
     }
