@@ -299,9 +299,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void calculateAndShowLocation()
     {
-        //            //调用getCoordinates()函数计算坐标
-//            List<Double> coordinates = getCoordinates();
-//            Log.d("Location", "Coordinates: " + coordinates.get(0) + ", " + coordinates.get(1) + ", " + coordinates.get(2));
+        //调用getCoordinates()函数计算坐标
+            List<Double> coordinates = getCoordinates();
+            Log.d("Location", "Coordinates: " + coordinates.get(0) + ", " + coordinates.get(1) + ", " + coordinates.get(2));
 //
         // 输出结果，后期可以改为任何对结果的处理
 //        text_output.setText("Ranging finished:\n");
@@ -420,6 +420,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         coordinates.add(X.getEntry(0, 0));
         coordinates.add(X.getEntry(1, 0));
         coordinates.add(X.getEntry(2, 0));
+        Log.d("Debug","X:"+coordinates.get(0)+"Y:"+coordinates.get(1)+"Z:"+coordinates.get(2));
 
         return coordinates;
     }
