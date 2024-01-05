@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- AP位置-->
+    <dimen name="ap_x1">0.3</dimen> <!-- 0.165 + 0.135 -->
+    <dimen name="ap_y1">0.3</dimen> <!-- 0.0 + 0.3 -->
+    <dimen name="ap_z1">1.988</dimen>
+
+    <dimen name="ap_x2">0.776</dimen> <!-- 0.641 + 0.135 -->
+    <dimen name="ap_y2">8.094</dimen> <!-- 7.794 + 0.3 -->
+    <dimen name="ap_z2">1.726</dimen>
+
+    <dimen name="ap_x3">5.526</dimen> <!-- 5.391 + 0.135 -->
+    <dimen name="ap_y3">0.664</dimen> <!-- 0.364 + 0.3 -->
+    <dimen name="ap_z3">1.801</dimen>
+
+    <dimen name="ap_x4">5.531</dimen> <!-- 5.396 + 0.135 -->
+    <dimen name="ap_y4">8.485</dimen> <!-- 8.185 + 0.3 -->
+    <dimen name="ap_z4">1.903</dimen>
+
+    <!-- 房间尺寸 -->
+    <dimen name="room_length">8.785</dimen>
+    <dimen name="room_width">5.831</dimen>
+    <dimen name="room_height">3.110</dimen>
+
+    <!-- 校准误差参数 -->
+    <item name="calibration_factor_d1" type="dimen">0.68</item>
+    <item name="calibration_offset_d1" type="dimen">-1.28</item>
+
+    <item name="calibration_factor_d2" type="dimen">0.72</item>
+    <item name="calibration_offset_d2" type="dimen">-1.61</item>
+
+    <item name="calibration_factor_d3" type="dimen">0.53</item>
+    <item name="calibration_offset_d3" type="dimen">-1.06</item>
+
+    <item name="calibration_factor_d4" type="dimen">0.34</item>
+    <item name="calibration_offset_d4" type="dimen">0.88</item>
+</resources>

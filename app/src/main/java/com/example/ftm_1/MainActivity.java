@@ -52,7 +52,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     final Handler mRangeRequestDelayHandler = new Handler();
     private int mMillisecondsDelayBeforeNewRangingRequest = 1;
-    private static final int MILLISECONDS_DELAY_BEFORE_NEW_RANGING_REQUEST_DEFAULT = 100;
 
     private int MAX_MULTI_RANGE_COUNT = 20;
     private int RANGE_RESULT_TRACK_COUNT = 20;
@@ -75,7 +74,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     // 所有AP的MAC地址
     List<String> macAddress = new ArrayList<>();
 
-    // TODO: 些什么list，就给我写死
     String macAddress_1 = "34:85:18:8f:1a:19";
     String macAddress_2 = "34:85:18:8f:42:21";
     String macAddress_3 = "34:85:18:95:f9:79";
@@ -103,30 +101,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     List<RangingResult> tmpRangingResults_3 = new ArrayList<>();
     List<RangingResult> tmpRangingResults_4 = new ArrayList<>();
 
-
-//    // AP信息
-//    private double x1 = 0.0, y1 = 1.858, z1 = 1.385;
-//    private double x2 = 1.036, y2 = 1.094, z2 = 1.053;
-//    private double x3 = 3.655, y3 = 1.502, z3 = 0.681;
-//    private double x4 = 2.540, y4 = 0.195, z4 = 0.998;
-
     // AP信息
-    // 加号是为了
-    private double x1 = 0.165 + 0.135, y1 = 0.0 + 0.3, z1 = 1.988;
-    private double x2 = 0.641 + 0.135, y2 = 7.794 + 0.3, z2 = 1.726;
-    private double x3 = 5.391 + 0.135, y3 = 0.364 + 0.3, z3 = 1.801;
-    private double x4 = 5.396 + 0.135, y4 = 8.185 + 0.3, z4 = 1.903;
+    private double x1, y1, z1;
+    private double x2, y2, z2;
+    private double x3, y3, z3;
+    private double x4, y4, z4;
 
     // 房间信息
-    private double roomLength = 8.785;
-    private double roomWidth = 5.831;
-    private double roomHeight = 3.110;
+    private double roomLength, roomWidth, roomHeight;
+
+    private double calibrationFactorD1, calibrationOffsetD1;
+    private double calibrationFactorD2, calibrationOffsetD2;
+    private double calibrationFactorD3, calibrationOffsetD3;
+    private double calibrationFactorD4, calibrationOffsetD4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // 读取配置文件
+        importAPLocation();
         //初始化控件
         initView();
 
@@ -150,6 +146,44 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 //        startFTMRanging_Allap();
 //        clearRangingResults();
+    }
+
+    private void importAPLocation()
+    {
+        // 导入AP信息
+        x1 = getResources().getDimension(R.dimen.ap_x1);
+        y1 = getResources().getDimension(R.dimen.ap_y1);
+        z1 = getResources().getDimension(R.dimen.ap_z1);
+
+        x2 = getResources().getDimension(R.dimen.ap_x2);
+        y2 = getResources().getDimension(R.dimen.ap_y2);
+        z2 = getResources().getDimension(R.dimen.ap_z2);
+
+        x3 = getResources().getDimension(R.dimen.ap_x3);
+        y3 = getResources().getDimension(R.dimen.ap_y3);
+        z3 = getResources().getDimension(R.dimen.ap_z3);
+
+        x4 = getResources().getDimension(R.dimen.ap_x4);
+        y4 = getResources().getDimension(R.dimen.ap_y4);
+        z4 = getResources().getDimension(R.dimen.ap_z4);
+
+        // 导入房间信息
+        roomLength = getResources().getDimension(R.dimen.room_length);
+        roomWidth = getResources().getDimension(R.dimen.room_width);
+        roomHeight = getResources().getDimension(R.dimen.room_height);
+
+        // 导入校准误差参数
+        calibrationFactorD1 = getResources().getDimension(R.dimen.calibration_factor_d1);
+        calibrationOffsetD1 = getResources().getDimension(R.dimen.calibration_offset_d1);
+
+        calibrationFactorD2 = getResources().getDimension(R.dimen.calibration_factor_d2);
+        calibrationOffsetD2 = getResources().getDimension(R.dimen.calibration_offset_d2);
+
+        calibrationFactorD3 = getResources().getDimension(R.dimen.calibration_factor_d3);
+        calibrationOffsetD3 = getResources().getDimension(R.dimen.calibration_offset_d3);
+
+        calibrationFactorD4 = getResources().getDimension(R.dimen.calibration_factor_d4);
+        calibrationOffsetD4 = getResources().getDimension(R.dimen.calibration_offset_d4);
     }
 
     // 检查是否支持RTT
@@ -311,22 +345,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mWifiRttManager.startRanging(mRangingRequest, getApplication().getMainExecutor(), mRttRangingResultCallback_Multi);
     }
 
-
-    private void calculateAndShowLocation()
-    {
-        //调用getCoordinates()函数计算坐标
-        List<Double> coordinates = getCoordinates();
-        Log.d("Location", "Coordinates: " + coordinates.get(0) + ", " + coordinates.get(1) + ", " + coordinates.get(2));
-//
-        // 输出结果，后期可以改为任何对结果的处理
-//        text_output.setText("Ranging finished:\n");
-
-//        text_FTM_result_1.setText("AP1: " + rangingResults_1.get(rangingResults_1.size() - 1).getDistanceMm());
-//        text_FTM_result_2.setText("AP2: " + rangingResults_2.get(rangingResults_2.size() - 1).getDistanceMm());
-//        text_FTM_result_3.setText("AP3: " + rangingResults_3.get(rangingResults_3.size() - 1).getDistanceMm());
-//        text_FTM_result_4.setText("AP4: " + rangingResults_4.get(rangingResults_4.size() - 1).getDistanceMm());
-    }
-
     private void setLocationOnScreen(float x, float y)
     {
         if (x < 0.3)
@@ -455,29 +473,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             d4 += rangingResults_4.get(i).getDistanceMm() / 1000.0;
         }
 
-//        Log.d("TRACK", "d1:" + d1);
-//        Log.d("TRACK", "d2:" + d2);
-//        Log.d("TRACK", "d3:" + d3);
-//        Log.d("TRACK", "d4:" + d4);
-
         d1 /= numberOfResult;
         d2 /= numberOfResult;
         d3 /= numberOfResult;
         d4 /= numberOfResult;
 
-//        Log.d("TRACK", "d1:" + d1);
-//        Log.d("TRACK", "d2:" + d2);
-//        Log.d("TRACK", "d3:" + d3);
-//        Log.d("TRACK", "d4:" + d4);
-
         // 校准误差，记得两个函数的都需要改
-        d1 = 0.68 * d1 - 1.28;
-        d2 = 0.72 * d2 - 1.61;
-        d3 = 0.53 * d3 - 1.06;
-        d4 = 0.34 * d4 + 0.88;
+        d1 = calibrationFactorD1 * d1 + calibrationOffsetD1;
+        d2 = calibrationFactorD2 * d2 + calibrationOffsetD2;
+        d3 = calibrationFactorD3 * d3 + calibrationOffsetD3;
+        d4 = calibrationFactorD4 * d4 + calibrationOffsetD4;
 
         Log.d("Debug", "d1:" + d1 + "d2:" + d2 + "d3:" + d3 + "d4:" + d4);
-        Log.d("FTM", "d1:" + d1 + "d2:" + d2 + "d3:" + d3 + "d4:" + d4);
+        Log.d("TRACK", "d1:" + d1 + "d2:" + d2 + "d3:" + d3 + "d4:" + d4);
 
         //使用Apache Commons Math包，由最小二乘法推导得到的公式计算坐标
         //构造系数矩阵
@@ -535,27 +543,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         text_FTM_result_3.setText("d3:" + String.format("%.4f", d3));
         text_FTM_result_4.setText("d4:" + String.format("%.4f", d4));
         // 校准误差，记得两个函数的都需要改
-        d1 = 0.68 * d1 - 1.28;
-        d2 = 0.72 * d2 - 1.61;
-        d3 = 0.53 * d3 - 1.06;
-        d4 = 0.34 * d4 + 0.88;
-
-
-//        d1 = -(0.29 - java.lang.Math.sqrt(0.29 * 0.29 - 0.36 * (3.24 - d1))) / 0.18;
-//        d2 = -(0.29 - java.lang.Math.sqrt(0.29 * 0.29 - 0.36 * (3.24 - d2))) / 0.18;
-//        d3 = -(0.29 - java.lang.Math.sqrt(0.29 * 0.29 - 0.36 * (3.24 - d3))) / 0.18;
-//        d4 = -(0.29 - java.lang.Math.sqrt(0.29 * 0.29 - 0.36 * (3.24 - d4))) / 0.18;
-
-        // 测试用
-//        d1 = 5.35;
-//        d2 = 2.594;
-//        d3 = 6.732;
-//        d4 = 5.7;
-
+        d1 = calibrationFactorD1 * d1 + calibrationOffsetD1;
+        d2 = calibrationFactorD2 * d2 + calibrationOffsetD2;
+        d3 = calibrationFactorD3 * d3 + calibrationOffsetD3;
+        d4 = calibrationFactorD4 * d4 + calibrationOffsetD4;
 
         Log.d("Debug", "d1:" + d1 + "d2:" + d2 + "d3:" + d3 + "d4:" + d4);
         Log.d("FTM", "d1:" + d1 + "d2:" + d2 + "d3:" + d3 + "d4:" + d4);
-
 
         //使用Apache Commons Math包，由最小二乘法推导得到的公式计算坐标
         //构造系数矩阵
@@ -831,8 +825,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 {
                     getCoordinates_Track();
                     requestNextFTMRanging();
-                }
-                else {
+                } else
+                {
                     setLocationOnScreen(0.0f, 0.0f);
                 }
 
