@@ -112,14 +112,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     // AP信息
     // 加号是为了
-    private double x1 = 0.165 + 0.135, y1 = 0.0 + 0.3, z1 = 1.988;
-    private double x2 = 0.641 + 0.135, y2 = 7.794 + 0.3, z2 = 1.726;
-    private double x3 = 5.391 + 0.135, y3 = 0.364 + 0.3, z3 = 1.801;
-    private double x4 = 5.396 + 0.135, y4 = 8.185 + 0.3, z4 = 1.903;
+    private double x1 = 0.505 + 8.0, y1 = 31.052 + 0.5, z1 = 2.138;
+    private double x2 = 6.583 + 8.0, y2 = 31.052 + 0.5, z2 = 1.961;
+    private double x3 = 6.638 + 8.0, y3 = 0.5, z3 = 1.752;
+    private double x4 = 0.429 + 8.0, y4 = 0.5, z4 = 1.745;
 
     // 房间信息
-    private double roomLength = 8.785;
-    private double roomWidth = 5.831;
+    private double roomLength = 31.052 + 1.0;
+    private double roomWidth = 7.051 + 16.0;
     private double roomHeight = 3.110;
 
     @Override
@@ -329,21 +329,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void setLocationOnScreen(float x, float y)
     {
-        if (x < 0.3)
-        {
-            x = 0.3f;
-        } else if (x > 5.396)
-        {
-            x = 5.396f;
-        }
-
-        if (y < 0.3)
-        {
-            y = 0.3f;
-        } else if (y > 8.364)
-        {
-            y = 8.364f;
-        }
+//        if (x < 0.3)
+//        {
+//            x = 0.3f;
+//        } else if (x > 5.396)
+//        {
+//            x = 5.396f;
+//        }
+//
+//        if (y < 0.3)
+//        {
+//            y = 0.3f;
+//        } else if (y > 8.364)
+//        {
+//            y = 8.364f;
+//        }
         locationView.setLocation(x, y);
     }
 
@@ -471,10 +471,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        Log.d("TRACK", "d4:" + d4);
 
         // 校准误差，记得两个函数的都需要改
-        d1 = 0.68 * d1 - 1.28;
-        d2 = 0.72 * d2 - 1.61;
-        d3 = 0.53 * d3 - 1.06;
-        d4 = 0.34 * d4 + 0.88;
+        d1 = 0.70 * d1 - 11.98;
+        d2 = 0.62 * d2 - 11.30;
+        d3 = 0.69 * d3 - 10.79;
+        d4 = 0.60 * d4 - 7.62;
 
         Log.d("Debug", "d1:" + d1 + "d2:" + d2 + "d3:" + d3 + "d4:" + d4);
         Log.d("FTM", "d1:" + d1 + "d2:" + d2 + "d3:" + d3 + "d4:" + d4);
@@ -495,6 +495,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         coordinates.add(X.getEntry(1, 0));
         coordinates.add(X.getEntry(2, 0));
         Log.d("Debug", "X:" + coordinates.get(0) + "Y:" + coordinates.get(1) + "Z:" + coordinates.get(2));
+
         text_Location_X.setText("X: " + String.format("%2.4f", coordinates.get(0)));
         text_Location_Y.setText("Y: " + String.format("%2.4f", coordinates.get(1)));
 
@@ -529,33 +530,39 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         d3 /= rangingResults_3.size();
         d4 /= rangingResults_4.size();
 
-        Log.d("FTM_2", d2 + "");
-        text_FTM_result_1.setText("d1:" + String.format("%.4f", d1));
-        text_FTM_result_2.setText("d2:" + String.format("%.4f", d2));
-        text_FTM_result_3.setText("d3:" + String.format("%.4f", d3));
-        text_FTM_result_4.setText("d4:" + String.format("%.4f", d4));
+        // 在log中输出没有校准的数据
+        Log.d("Calibrate", "\td1:\t" + String.format("%.6f", d1) + "\td2:\t" + String.format("%.6f", d2) + "\td3:\t" + String.format("%.6f", d3) + "\td4:\t" + String.format("%.6f", d4));
+
+        text_FTM_result_1.setText("d1:" + String.format("%.6f", d1));
+        text_FTM_result_2.setText("d2:" + String.format("%.6f", d2));
+        text_FTM_result_3.setText("d3:" + String.format("%.6f", d3));
+        text_FTM_result_4.setText("d4:" + String.format("%.6f", d4));
+
         // 校准误差，记得两个函数的都需要改
-        d1 = 0.68 * d1 - 1.28;
-        d2 = 0.72 * d2 - 1.61;
-        d3 = 0.53 * d3 - 1.06;
-        d4 = 0.34 * d4 + 0.88;
+        //552实验室
+//        d1 = 0.68 * d1 - 1.28;
+//        d2 = 0.72 * d2 - 1.61;
+//        d3 = 0.53 * d3 - 1.06;
+//        d4 = 0.34 * d4 + 0.88;
+
+        // 连廊
+        d1 = 0.70 * d1 - 11.98;
+        d2 = 0.62 * d2 - 11.30;
+        d3 = 0.69 * d3 - 10.79;
+        d4 = 0.60 * d4 - 7.62;
+
+//        text_FTM_result_1.setText("d1:" + String.format("%.4f", d1));
+//        text_FTM_result_2.setText("d2:" + String.format("%.4f", d2));
+//        text_FTM_result_3.setText("d3:" + String.format("%.4f", d3));
+//        text_FTM_result_4.setText("d4:" + String.format("%.4f", d4));
 
 
 //        d1 = -(0.29 - java.lang.Math.sqrt(0.29 * 0.29 - 0.36 * (3.24 - d1))) / 0.18;
 //        d2 = -(0.29 - java.lang.Math.sqrt(0.29 * 0.29 - 0.36 * (3.24 - d2))) / 0.18;
 //        d3 = -(0.29 - java.lang.Math.sqrt(0.29 * 0.29 - 0.36 * (3.24 - d3))) / 0.18;
 //        d4 = -(0.29 - java.lang.Math.sqrt(0.29 * 0.29 - 0.36 * (3.24 - d4))) / 0.18;
-
-        // 测试用
-//        d1 = 5.35;
-//        d2 = 2.594;
-//        d3 = 6.732;
-//        d4 = 5.7;
-
-
         Log.d("Debug", "d1:" + d1 + "d2:" + d2 + "d3:" + d3 + "d4:" + d4);
         Log.d("FTM", "d1:" + d1 + "d2:" + d2 + "d3:" + d3 + "d4:" + d4);
-
 
         //使用Apache Commons Math包，由最小二乘法推导得到的公式计算坐标
         //构造系数矩阵
@@ -574,6 +581,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         coordinates.add(X.getEntry(1, 0));
         coordinates.add(X.getEntry(2, 0));
         Log.d("Debug", "X:" + coordinates.get(0) + "Y:" + coordinates.get(1) + "Z:" + coordinates.get(2));
+        Log.d("Location_test", "\tX:\t" + coordinates.get(0) + "\tY:\t" + coordinates.get(1) + "\tZ:\t" + coordinates.get(2));
         text_Location_X.setText("X: " + String.format("%2.4f", coordinates.get(0)));
         text_Location_Y.setText("Y: " + String.format("%2.4f", coordinates.get(1)));
 
@@ -831,8 +839,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 {
                     getCoordinates_Track();
                     requestNextFTMRanging();
-                }
-                else {
+                } else
+                {
                     setLocationOnScreen(0.0f, 0.0f);
                 }
 
