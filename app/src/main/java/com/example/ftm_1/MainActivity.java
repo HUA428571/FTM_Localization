@@ -71,13 +71,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private LocationView locationView;
     Context context;
 
-    // 所有AP的MAC地址
-    List<String> macAddress = new ArrayList<>();
-
-    String macAddress_1 = "34:85:18:8f:1a:19";
-    String macAddress_2 = "34:85:18:8f:42:21";
-    String macAddress_3 = "34:85:18:95:f9:79";
-    String macAddress_4 = "34:85:18:8f:19:c1";
+    // AP的MAC地址
+    String macAddress_1;
+    String macAddress_2;
+    String macAddress_3;
+    String macAddress_4;
 
     int totalAP = 4;
 
@@ -108,12 +106,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private double x4, y4, z4;
 
     // 房间信息
-    private double roomLength, roomWidth, roomHeight;
+    private float roomLength, roomWidth, roomHeight;
 
-    private double calibrationFactorD1, calibrationOffsetD1;
-    private double calibrationFactorD2, calibrationOffsetD2;
-    private double calibrationFactorD3, calibrationOffsetD3;
-    private double calibrationFactorD4, calibrationOffsetD4;
+    private float calibrationFactorD1, calibrationOffsetD1;
+    private float calibrationFactorD2, calibrationOffsetD2;
+    private float calibrationFactorD3, calibrationOffsetD3;
+    private float calibrationFactorD4, calibrationOffsetD4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -134,56 +132,51 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mRttRangingResultCallback = new RttRangingResultCallback();
         mRttRangingResultCallback_Multi = new RttRangingResultCallback_Multi();
 
-        // TODO：暂时在变量里面写死，这部分用不到
-        // 初始化所有AP的MAC地址
-        macAddress.add("34:85:18:8f:1a:19");    // FTM1
-        macAddress.add("34:85:18:8f:42:21");    // FTM2
-        macAddress.add("34:85:18:95:f9:79");    // FTM3
-        macAddress.add("34:85:18:8f:19:c1");    // FTM4
-
         // 扫描所有AP
         startScanAP();
-
-//        startFTMRanging_Allap();
-//        clearRangingResults();
     }
 
     private void importAPLocation()
     {
         // 导入AP信息
-        x1 = getResources().getDimension(R.dimen.ap_x1);
-        y1 = getResources().getDimension(R.dimen.ap_y1);
-        z1 = getResources().getDimension(R.dimen.ap_z1);
+        x1 = Float.parseFloat(getResources().getString(R.string.ap_x1));
+        y1 = Float.parseFloat(getResources().getString(R.string.ap_y1));
+        z1 = Float.parseFloat(getResources().getString(R.string.ap_z1));
 
-        x2 = getResources().getDimension(R.dimen.ap_x2);
-        y2 = getResources().getDimension(R.dimen.ap_y2);
-        z2 = getResources().getDimension(R.dimen.ap_z2);
+        x2 = Float.parseFloat(getResources().getString(R.string.ap_x2));
+        y2 = Float.parseFloat(getResources().getString(R.string.ap_y2));
+        z2 = Float.parseFloat(getResources().getString(R.string.ap_z2));
 
-        x3 = getResources().getDimension(R.dimen.ap_x3);
-        y3 = getResources().getDimension(R.dimen.ap_y3);
-        z3 = getResources().getDimension(R.dimen.ap_z3);
+        x3 = Float.parseFloat(getResources().getString(R.string.ap_x3));
+        y3 = Float.parseFloat(getResources().getString(R.string.ap_y3));
+        z3 = Float.parseFloat(getResources().getString(R.string.ap_z3));
 
-        x4 = getResources().getDimension(R.dimen.ap_x4);
-        y4 = getResources().getDimension(R.dimen.ap_y4);
-        z4 = getResources().getDimension(R.dimen.ap_z4);
+        x4 = Float.parseFloat(getResources().getString(R.string.ap_x4));
+        y4 = Float.parseFloat(getResources().getString(R.string.ap_y4));
+        z4 = Float.parseFloat(getResources().getString(R.string.ap_z4));
 
         // 导入房间信息
-        roomLength = getResources().getDimension(R.dimen.room_length);
-        roomWidth = getResources().getDimension(R.dimen.room_width);
-        roomHeight = getResources().getDimension(R.dimen.room_height);
+        roomLength = Float.parseFloat(getResources().getString(R.string.room_length));
+        roomWidth = Float.parseFloat(getResources().getString(R.string.room_width));
+        roomHeight = Float.parseFloat(getResources().getString(R.string.room_height));
 
         // 导入校准误差参数
-        calibrationFactorD1 = getResources().getDimension(R.dimen.calibration_factor_d1);
-        calibrationOffsetD1 = getResources().getDimension(R.dimen.calibration_offset_d1);
+        calibrationFactorD1 = Float.parseFloat(getResources().getString(R.string.calibration_factor_d1));
+        calibrationOffsetD1 = Float.parseFloat(getResources().getString(R.string.calibration_offset_d1));
 
-        calibrationFactorD2 = getResources().getDimension(R.dimen.calibration_factor_d2);
-        calibrationOffsetD2 = getResources().getDimension(R.dimen.calibration_offset_d2);
+        calibrationFactorD2 = Float.parseFloat(getResources().getString(R.string.calibration_factor_d2));
+        calibrationOffsetD2 = Float.parseFloat(getResources().getString(R.string.calibration_offset_d2));
 
-        calibrationFactorD3 = getResources().getDimension(R.dimen.calibration_factor_d3);
-        calibrationOffsetD3 = getResources().getDimension(R.dimen.calibration_offset_d3);
+        calibrationFactorD3 = Float.parseFloat(getResources().getString(R.string.calibration_factor_d3));
+        calibrationOffsetD3 = Float.parseFloat(getResources().getString(R.string.calibration_offset_d3));
 
-        calibrationFactorD4 = getResources().getDimension(R.dimen.calibration_factor_d4);
-        calibrationOffsetD4 = getResources().getDimension(R.dimen.calibration_offset_d4);
+        calibrationFactorD4 = Float.parseFloat(getResources().getString(R.string.calibration_factor_d4));
+        calibrationOffsetD4 = Float.parseFloat(getResources().getString(R.string.calibration_offset_d4));
+
+        macAddress_1 = getResources().getString(R.string.mac_address_AP1);
+        macAddress_2 = getResources().getString(R.string.mac_address_AP2);
+        macAddress_3 = getResources().getString(R.string.mac_address_AP3);
+        macAddress_4 = getResources().getString(R.string.mac_address_AP4);
     }
 
     // 检查是否支持RTT
@@ -226,6 +219,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         startScanAP();
         // 清空测距结果
         clearRangingResults();
+        text_output.setText("Result cleared");
     }
 
     private void clearRangingResults()
@@ -347,20 +341,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void setLocationOnScreen(float x, float y)
     {
-        if (x < 0.3)
+        if (x < 0.3f)
         {
             x = 0.3f;
-        } else if (x > 5.396)
+        } else if (x > roomWidth - 0.3f)
         {
-            x = 5.396f;
+            x = roomWidth - 0.3f;
         }
 
-        if (y < 0.3)
+        if (y < 0.3f)
         {
             y = 0.3f;
-        } else if (y > 8.364)
+        } else if (y > roomLength)
         {
-            y = 8.364f;
+            y = roomLength - 0.3f;
         }
         locationView.setLocation(x, y);
     }
@@ -697,13 +691,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             } else if (flagAP1 | flagAP2 | flagAP3 | flagAP4)
             {
                 mFlagRangeSuccess = 1;
-                text_output.setText("Ranging failed, please retry");
+                text_output.setText("Ranging failed, retry");
                 Log.d("Debug", "mFlagRangeSuccess:" + mFlagRangeSuccess);
                 requestNextFTMRanging();
             } else
             {
                 mFlagRangeSuccess = -2;
-                text_output.setText("Ranging failed, please retry");
+                text_output.setText("Ranging failed, retry");
                 Log.d("Debug", "mFlagRangeSuccess:" + mFlagRangeSuccess);
                 requestNextFTMRanging();
             }
@@ -827,19 +821,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     requestNextFTMRanging();
                 } else
                 {
-                    setLocationOnScreen(0.0f, 0.0f);
+                    locationView.setLocation(-100, -100);
+                    text_output.setText("Tracking stopped");
                 }
 
             } else if (flagAP1 | flagAP2 | flagAP3 | flagAP4)
             {
                 mFlagRangeSuccess = 1;
-                text_output.setText("Ranging failed, please retry");
+                text_output.setText("Ranging failed, retry");
                 Log.d("Debug", "mFlagRangeSuccess:" + mFlagRangeSuccess);
                 requestNextFTMRanging();
             } else
             {
                 mFlagRangeSuccess = -2;
-                text_output.setText("Ranging failed, please retry");
+                text_output.setText("Ranging failed, retry");
                 Log.d("Debug", "mFlagRangeSuccess:" + mFlagRangeSuccess);
                 requestNextFTMRanging();
             }
