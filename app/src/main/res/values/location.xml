@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ap_x1">0.3</string> <!-- 0.165 + 0.135 -->
+    <string name="ap_y1">0.3</string> <!-- 0.0 + 0.3 -->
+    <string name="ap_z1">1.988</string>
+
+    <string name="ap_x2">0.776</string> <!-- 0.641 + 0.135 -->
+    <string name="ap_y2">8.094</string> <!-- 7.794 + 0.3 -->
+    <string name="ap_z2">1.726</string>
+
+    <string name="ap_x3">5.526</string> <!-- 5.391 + 0.135 -->
+    <string name="ap_y3">0.664</string> <!-- 0.364 + 0.3 -->
+    <string name="ap_z3">1.801</string>
+
+    <string name="ap_x4">5.531</string> <!-- 5.396 + 0.135 -->
+    <string name="ap_y4">8.485</string> <!-- 8.185 + 0.3 -->
+    <string name="ap_z4">1.903</string>
+
+    <!-- 房间尺寸 -->
+    <string name="room_length">8.785</string>
+    <string name="room_width">5.831</string>
+    <string name="room_height">3.110</string>
+
+    <!-- 校准误差参数 -->
+    <string name="calibration_factor_d1">0.68</string>
+    <string name="calibration_offset_d1">-1.28</string>
+
+    <string name="calibration_factor_d2">0.72</string>
+    <string name="calibration_offset_d2">-1.61</string>
+
+    <string name="calibration_factor_d3">0.53</string>
+    <string name="calibration_offset_d3">-1.06</string>
+
+    <string name="calibration_factor_d4">0.34</string>
+    <string name="calibration_offset_d4">0.88</string>
+
+    <string name="mac_address_AP1">34:85:18:8f:1a:19</string> <!-- FTM1 -->
+    <string name="mac_address_AP2">34:85:18:8f:42:21</string> <!-- FTM2 -->
+    <string name="mac_address_AP3">34:85:18:95:f9:79</string> <!-- FTM3 -->
+    <string name="mac_address_AP4">34:85:18:8f:19:c1</string> <!-- FTM4 -->
+</resources>
